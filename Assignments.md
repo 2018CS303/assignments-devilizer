@@ -1,45 +1,58 @@
-# Assignment
+## Assignment 2
 
-## Blue Ocean
+## Installing Blue Ocean
+- From an administrator account go to `Manage jenkins > Manage plugins`
+- Install the blueocean aggregator plugin from the `Available` tab. This is available after jenkins 2.7 
+- All the other plugins needed will be installed automatically as dependencies, and hence do not need to be installed seperatly
+- Blue Ocean will be installed and can be used when jenkins is restarted
+- To restart jenkins type `sudo systemctl restart jenkins` in the terminal
+- In the menu select `Open Blue Ocean`
+- Voila!, jenkins is now visually appealing
 
-1. From the administrator account, move to `Manage Jenkins -> Manage Plugins`.
-2. Install `Blue Ocean (BlueOcean Aggregator)` plugin from the list of `Available` plugins.
-3. Install Blue Ocean along with the required dependencies.
-4. Restart Jenkins
-```bash
-sudo service jenkins restart
-```
-5. Upon restart, enable the Blue Ocean option from the GUI.
+We will now create a new freestyle project and use it for the remaining actions
 
-## Private repository as FreeStyle Project
+## Linking a private GitHub repository:
+- Open your project and go to `Configuration`
+- Under the `General` section select `Github Project` and provide the url of the repo
+- Under `Source Code Management` select `Git`
+- Provide the repository URL in the `Repository URL` section
+- Hit the `Add` button next to `Credentials` and enter your credentials for your github account (needed since jenkins will try to access a private repository)
+- Once they are added select them from the dropdown menu for `Credentials`
+- Select the branches to build or leave them as `*/master` (default)
+- This will link jenkins to your private repository
 
-1. Setup a new freestyle project - `New Item -> Freestyle project`.
-2. Set Source Code Management to `Git`.
-3. Provide the private repository link in `Repository URL`.
-4. To permit Jenkins to access the Private Github repository, please update the credentials. `Add -> Credentials -> Jenkins` and update.
-5. Set this as the `Credentials`.
-6. Update the branch (if required) - Default : `*/master`.
+## Remote Build Trigger:
 
-## Git SCM Poll
+Note: According to the GitHub documentation this should have worked but it did not trigger a build like expected.
 
-1. Map the [Jenkins URL](http://localhost:8080/) to a public IP address.
-  
-  - Map a Public IP to your [Jenkins URL](http://localhost:8080/) using `ngrok`.
-  - Download and setup `ngrok` from [here](https://ngrok.com/download).
-  - Run `./ngrock http 8080` (map your Jenkins port (8080) to a public IP. The public URL `http://<foo>.ngrok.io` should be used as the Webhook.
+A webhook is a tool available with GitHub which allows GitHub to send a payload to a particular location on the internet based on certain triggers. This payload delivery can be used by Jenkins to trigger a build
 
-2. Setup
-  
-  - Navigate `Settings -> Webhooks -> Add webhook` in the repository.
-  - Update the `Payload URL` to the Public IP `http://<foo>.ngrok.io/github-webhook/`.
-  - Set `Content type` as `application/json`.
-  - Update `Which events would you like to trigger this webhook?` as per requirement.
-  - Ensure that the `Active` option is selected.
+### Adding A WebHook:
+- Go to the repository and go to `Settings > Webhooks` and click `Add webhook`
+- Fill the payload URL section with `http://localhost:8080/github-webhook/` (this will later be replaced with a corresponding public URL)
+- Select which events you would like to trigger the payload delivery
+- Once you're done click on `Add webhook`
 
-## Post-build Actions
+### Getting a public URL for Jenkins:
+- The tool `ngrok` helps us achieve this. It can be downloaded [here](https://ngrok.com/download)
+- Once installed, enter `./ngrok http 8080` in your terminal. This will give you a public URL which has a secure link to the page on port 8080 of your localhost 
+- You should see something like `Forwarding   https://ad33c62e.ngrok.io -> localhost:8080`. The `*.ngrok.io` URL is the corresponding pulic URL.
+- Use this as the `payload URL` on the github page of your repository described above.
 
-1. Select the project and navigate `Configure -> Post-build Actions`
-2. In `Add post-build action` choose `Archive the artifacts`.
-3. Mention the files to archive ( `*` to archive all the files).
-4. In the `Advanced...` tab, enable `Archive only if build is successful` and `Use default excludes`.
+### Configuring build triggers:
+- Open your project and go to `Configuration > Build Triggers`
+- Select `GitHub hook trigger for GITScm polling` and save changes
 
+Ideally this should be enough to use GITScm polling and trigger builds on Jenkins based on actions on github. 
+
+## Post build action:
+Here, we adding the `Archive` post build action. This will archive selected files.
+
+- Select the project and go to `Configure > Post-build Actions`
+- Click the `Add post-build action` button and select `Archive the artifacts`
+- Select the files that you want to archive (eg: `*` will archive all the files)
+- Click the `Advanced` button
+- Select
+	- `Use default excludes`
+	- `Archive artifacts only if build is successful`
+- This will archive all files in the linked github repo when the build is successful
