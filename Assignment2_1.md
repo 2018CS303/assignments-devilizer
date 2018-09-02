@@ -7,9 +7,6 @@
 - Blue Ocean will be installed and can be used when jenkins is restarted
 - To restart jenkins type `sudo systemctl restart jenkins` in the terminal
 - In the menu select `Open Blue Ocean`
-- Voila!, jenkins is now visually appealing
-
-We will now create a new freestyle project and use it for the remaining actions
 
 ## Linking a private GitHub repository:
 - Open your project and go to `Configuration`
